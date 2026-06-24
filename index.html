@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Climate+Crisis&family=Funnel+Display:wght@300..800&display=swap" rel="stylesheet">
+<title>Profiler — Portfolio laadt binnenkort</title>
+<style>
+  :root {
+    --ink:   #000000;
+    --paper: #ffffff;
+    --gray:  #aaaaaa;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink:   #ffffff;
+      --paper: #000000;
+      --gray:  #555555;
+    }
+  }
+
+  /* Hoog-contrast modus: zwart op geel (#000 op #FFD400 ≈ 16:1, WCAG AAA).
+     Overschrijft zowel light- als dark-mode omdat het op de html-class zit. */
+  html.contrast {
+    --ink:   #000000;
+    --paper: #ffd400;
+    --gray:  #000000;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; background: var(--paper); }
+
+  body {
+    min-height: 100vh;
+    /* 50% dither desktop pattern (scherp schaakbord, geen naden) */
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(45deg, var(--ink) 25%, transparent 25% 75%, var(--ink) 75%),
+      linear-gradient(45deg, var(--ink) 25%, transparent 25% 75%, var(--ink) 75%);
+    background-position: 0 0, 2px 2px;
+    background-size: 4px 4px;
+    color: var(--ink);
+    font-family: "Funnel Display", system-ui, sans-serif;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 3rem;
+    image-rendering: pixelated;
+  }
+
+  /* ---- Menu bar ---- */
+  .menubar {
+    width: 100%;
+    background: var(--paper);
+    border-bottom: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: .4rem .9rem;
+    font-size: .95rem;
+    letter-spacing: .02em;
+    flex-wrap: wrap;
+  }
+  .menubar .logo {
+    font-family: "Funnel Display", sans-serif;
+    font-weight: 800;
+    letter-spacing: .12em;
+  }
+  .menubar .spacer { margin-left: auto; }
+  .menubar .clock { font-variant-numeric: tabular-nums; }
+
+  .contrast-toggle {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .8rem;
+    letter-spacing: .04em;
+    color: var(--ink);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    padding: .15rem .55rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+  }
+  .contrast-toggle:hover,
+  .contrast-toggle:focus-visible {
+    background: var(--ink);
+    color: var(--paper);
+    outline: none;
+  }
+  .contrast-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .contrast-toggle .dot {
+    width: 12px; height: 12px;
+    border: 2px solid currentColor;
+    background: transparent;
+    flex: none;
+  }
+  html.contrast .contrast-toggle .dot { background: currentColor; }
+
+  /* ---- Window chrome ---- */
+  .window {
+    width: 100%;
+    max-width: 640px;
+    margin: 2.5rem 1rem 0;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid var(--ink);
+    height: 30px;
+    /* horizontal "racing stripes" of a Mac/GEM-style title */
+    background-image: repeating-linear-gradient(
+      to bottom,
+      var(--ink) 0, var(--ink) 1px,
+      var(--paper) 1px, var(--paper) 3px
+    );
+  }
+  .close-box {
+    width: 22px; height: 22px;
+    margin: 0 6px;
+    border: 3px solid var(--ink);
+    background: var(--paper);
+    flex: none;
+    cursor: pointer;
+    display: block;
+  }
+  .close-box:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .titlebar .title {
+    background: var(--paper);
+    padding: 0 14px;
+    margin: 0 auto;
+    font-size: 1rem;
+    letter-spacing: .08em;
+  }
+  .titlebar .resize { width: 22px; height: 22px; margin: 0 6px; flex: none; }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex;
+    border-bottom: 3px solid var(--ink);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: .5rem .25rem;
+    font-size: .85rem;
+    border-right: 3px solid var(--ink);
+    background: var(--paper);
+  }
+  .tab:last-child { border-right: 0; }
+  .tab.active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .window-body { padding: 1.25rem 1.1rem 1.4rem; }
+
+  /* ---- Readout list ---- */
+  .col-head, .row, .statusbar {
+    font-family: "Courier New", ui-monospace, monospace;
+    font-weight: 700;
+  }
+  .col-head {
+    display: grid;
+    grid-template-columns: 1fr 56px 88px;
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: .35rem;
+    margin-bottom: .35rem;
+    font-size: .82rem;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 56px 88px;
+    font-size: .85rem;
+    line-height: 1.9;
+  }
+  .row .done { letter-spacing: .05em; }
+  .status-ok  { }
+  .status-load {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0 4px;
+  }
+
+  /* ---- Headline block ---- */
+  .headline {
+    border: 3px solid var(--ink);
+    padding: 1rem;
+    margin: 1.25rem 0;
+    text-align: center;
+  }
+  .headline .eyebrow {
+    font-size: .72rem;
+    letter-spacing: .3em;
+    margin-bottom: .6rem;
+  }
+  h1 {
+    font-family: "Climate Crisis", Impact, "Arial Black", sans-serif;
+    font-weight: 400;
+    font-variation-settings: "YEAR" 2000;
+    font-size: clamp(1.5rem, 6vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+  }
+  .blink { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .tagline {
+    margin: 1rem 0 0;
+    font-size: .85rem;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ---- Buttons (chiseled) ---- */
+  .actions {
+    display: flex;
+    gap: .75rem;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    padding: .6rem .5rem;
+    border: 3px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 3px 3px 0 var(--ink);
+    cursor: pointer;
+    display: block;
+  }
+  .btn:hover, .btn:focus-visible {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: none;
+    transform: translate(3px, 3px);
+    outline: none;
+  }
+
+  /* ---- Status bar ---- */
+  .statusbar {
+    border-top: 3px solid var(--ink);
+    margin-top: 1.25rem;
+    padding-top: .7rem;
+    font-size: .72rem;
+    letter-spacing: .1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+
+  /* ---- Boot-up animatie ---- */
+  @keyframes boot-bar {
+    from { transform: translateY(-100%); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+  }
+  @keyframes window-open {
+    from { transform: scale(.86); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes line-in {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes flash {
+    0%, 49%  { background: var(--ink); }
+    50%, 100% { background: transparent; }
+  }
+
+  .menubar {
+    transform-origin: top;
+    animation: boot-bar .35s steps(3) both;
+  }
+  .window {
+    transform-origin: center top;
+    animation: window-open .45s steps(5) .35s both;
+  }
+
+  /* Tabel-, headline-, knop- en statusregels één voor één */
+  .col-head { animation: line-in .25s steps(2) .85s both; }
+  .row:nth-of-type(1)  { animation: line-in .25s steps(2) 1.00s both; }
+  .row:nth-of-type(2)  { animation: line-in .25s steps(2) 1.15s both; }
+  .row:nth-of-type(3)  { animation: line-in .25s steps(2) 1.30s both; }
+  .row:nth-of-type(4)  { animation: line-in .25s steps(2) 1.45s both; }
+  .headline { animation: line-in .3s steps(2) 1.65s both; }
+  .actions  { animation: line-in .3s steps(2) 1.90s both; }
+  .statusbar{ animation: line-in .3s steps(2) 2.10s both; }
+
+  /* Scan-flash over het venster tijdens het openen */
+  .window::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    pointer-events: none;
+    animation: flash .12s steps(1) 2 .35s both;
+  }
+  .window { position: relative; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; }
+    .window::after { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="menubar">
+    <span class="logo">&#9651; ATARI</span>
+    <span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+    <span class="spacer"></span>
+    <button type="button" class="contrast-toggle" aria-pressed="false">
+      <span class="dot" aria-hidden="true"></span>Contrast
+    </button>
+    <span class="clock">00:00</span>
+  </div>
+
+  <main class="window" aria-label="Profiler venster">
+    <div class="titlebar">
+      <a href="#" class="close-box" aria-label="Sluiten"></a>
+      <span class="title">Profiler</span>
+      <span class="resize" aria-hidden="true"></span>
+    </div>
+
+    <nav class="tabs" aria-label="Secties">
+      <span class="tab">Applications</span>
+      <span class="tab active">Processes</span>
+      <span class="tab">Monitor</span>
+    </nav>
+
+    <div class="window-body">
+      <div class="col-head">
+        <span>Name</span><span>Pri</span><span>Status</span>
+      </div>
+      <div class="row"><span>Boot ROM</span><span>1</span><span class="done">READY</span></div>
+      <div class="row"><span>Projecten</span><span>4</span><span><span class="status-load">LADEN</span></span></div>
+      <div class="row"><span>Case studies</span><span>4</span><span><span class="status-load">LADEN</span></span></div>
+      <div class="row"><span>Contact</span><span>1</span><span class="done">READY</span></div>
+
+      <div class="headline">
+        <p class="eyebrow">SYSTEM 2026 &middot; PORTFOLIO</p>
+        <h1>Insert Cartridge<span class="blink">_</span></h1>
+        <p class="tagline">De applicatie wordt geladen. Werk, projecten en een paar
+        high scores verschijnen hier binnenkort op het scherm.</p>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="mailto:hallo@portfolio.nl">Mail</a>
+        <a class="btn" href="#">Profiel</a>
+        <a class="btn" href="#">Code</a>
+      </div>
+
+      <div class="statusbar">
+        <span>APPS 5</span><span>TASKS 9</span><span>RAM 996K FREE</span><span>COMING SOON</span>
+      </div>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var btn = document.querySelector('.contrast-toggle');
+      btn.addEventListener('click', function () {
+        var on = document.documentElement.classList.toggle('contrast');
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    })();
+
+    (function () {
+      var clock = document.querySelector('.clock');
+      function tick() {
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2, '0');
+        var m = String(now.getMinutes()).padStart(2, '0');
+        clock.textContent = h + ':' + m;
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+</body>
+</html>
